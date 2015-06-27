@@ -2,7 +2,7 @@
 
 from pyo import *
 import gammes
-### Doc de pyo : http://ajaxsoundstudio.com/pyodoc/
+### pyo documentation : http://ajaxsoundstudio.com/pyodoc/
 
 
 class SoundServer:
@@ -29,6 +29,7 @@ class SoundServer:
         self.sound1 = Sine(451, 0, 0).out()
 
 
+### pyo and sound mappings
     # lot of fun in this function. try new mappings!
     def sound_map(y, x, data):
         dia.sound.mul = 1
@@ -51,7 +52,7 @@ class SoundServer:
         scr.addstr(y, x, str(dia.sound.freq))
         scr.refresh()
 
-    def sound_map_spectrum(self, y, x, data):
+    def sound_map_variations(self, data):
     #spectre : environ 250-500Hz (le do est à 261.63)
     #tenir l'iPhone sur la tranche (boutons de volume vers le ciel, écran à droite)
         self.sound1.mul = 1

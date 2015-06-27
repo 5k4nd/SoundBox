@@ -22,6 +22,7 @@ def display_menu(stdscr, menu_y):
     erase_menu(stdscr, menu_y)
     stdscr.addstr(menu_y+1, 4,
                   'phoneIP: %s | port: %s' % ('fake_IP', 'fake'))
+                    #in the future: remove fake_IP when DataServer is Singleton and has get methods
     stdscr.addstr(menu_y+2, 4,
                   'P)lay / S)top sound ; Q)uit')
     stdscr.addstr(menu_y+3, 4,
@@ -55,16 +56,14 @@ def main_keyloop(stdscr, data, sound):
                     c = stdscr.getch()
                     c = chr(abs(c))
                     if c in 'Ss':
+                        sound.sound1.mul = 0
                         break
-                    if len(data.data) == 6:
-                        board.update_screen('ACC', data.data)
-                        sound.sound_map_spectrum(12, 55, float(data.data[5]))
-                        stdscr.addstr(12, 55, str(round(float(data.data[5]))))
-                        stdscr.refresh()
+                    elif data.data_format(): # if data isn't corrupted
+                        #board.update_screen('ALL', 'accelerometeraccelerationZ')
+                        sound.sound_map_variations(data.formated_data['accelerometeraccelerationZ'])
+                        stdscr.addstr(20, 55, str(data.formated_data['accelerometeraccelerationZ']))
+
                     sleep(.01)
-            if c in 'Ss':
-            # stop receiving data
-                action = 'music_stop'
 
             elif c in 'Qq':
                 break

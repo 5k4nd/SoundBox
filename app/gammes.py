@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf8 -*-
 
-
 g0 = {
 	'do': 32.7,
 	'dod': 34.65,

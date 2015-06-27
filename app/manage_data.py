@@ -3,19 +3,23 @@
 import threading
 import socket
 from time import sleep
+from curses import start_color, init_pair, color_pair, COLOR_GREEN, COLOR_BLACK
+
 
 class DataServer:
-    """process all our wonderful datum, from reception to formatting.
-    all Across the Stars (or, at least, this program)
+    """process all our wonderful data, from recept to format.
+            all Across the Stars (or, at least, this program)
 
     Attributes:
-      * data -- dictionary of SensorLog data
+      * row_data -- dictionary of SensorLog data
 
     Methods:
       * getDataThread() -- continuously receives data from smartphone
+      * data_format() -- check that data isn't corrupted and then format it for human needs
+            return True in case of success, False if data is corrupted
 
     """
-    DATASCHEME = [
+    DATASCHEME = [ # may be useful for data_format() for optimization. maybe list.join() method, or something like that?
         'loggingTime',
         'loggingSample',
         'locationHeadingTimestamp_since1970',
@@ -70,7 +74,8 @@ class DataServer:
         """
         self.HOSTIP = HOSTIP
         self.PORT = PORT
-        self.data = []
+        self.row_data = []
+        self.formated_data = {}
         self.getData = True
 
         thread = threading.Thread(target=self.getDataThread, args=(self.HOSTIP, self.PORT))
@@ -79,7 +84,7 @@ class DataServer:
 
 
     def getDataThread(self, HOSTIP, PORT):
-        """thread which continuously get data from the network (with socket)"""
+        """thread: get data continuously from the network (with socket)"""
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((HOSTIP, PORT))
         while self.getData == True:
@@ -88,17 +93,68 @@ class DataServer:
             # I check the second field which is the count.
             # integer means (it's just probability!) data is not corrupted
                 temp = int(receivedData[1])
-                self.data = receivedData
+                self.row_data = receivedData
             except:
+                self.row_data = [0]
                 pass
             sleep(.01) # no need to go too fast!
 
+
+    def data_format(self):
+        """check that data isn't corrupted and then format it for human needs"""
+        if len(self.row_data) == 39: #complexifier ce test pour ignnorer les valeurs aberrantes
+            self.formated_data = {
+                'loggingTime': self.row_data[0],
+                'loggingSample': self.row_data[1],
+                'locationHeadingTimestamp_since1970': self.row_data[2],
+                'locationHeadingX': self.row_data[3],
+                'locationHeadingY': self.row_data[4],
+                'locationHeadingZ': self.row_data[5],
+                'locationTrueHeading': self.row_data[6],
+                'locationMagneticHeading': self.row_data[7],
+                'locationHeadingAccuracy': self.row_data[8],
+                'accelerometerTimestamp_sinceReboot': self.row_data[9],
+                'accelerometerAccelerationX': self.row_data[10],
+                'accelerometeraccelerationY': self.row_data[11],
+                'accelerometeraccelerationZ': float(self.row_data[12]),
+                'gyroTimestamp_sinceReboot': self.row_data[13],
+                'gyroRotationX': self.row_data[14],
+                'gyroRotationY': self.row_data[15],
+                'gyroRotationZ': self.row_data[16],
+                'motionTimestamp_sinceReboot': self.row_data[17],
+                'motionYaw': self.row_data[18],
+                'motionRoll': self.row_data[19],
+                'motionPitch': self.row_data[20],
+                'motionRotationRateX': self.row_data[21],
+                'motionRotationRateY': self.row_data[22],
+                'motionRotationRateZ': self.row_data[23],
+                'motionUserAccelerationX': self.row_data[24],
+                'motionUserAccelerationY': self.row_data[25],
+                'motionUserAccelerationZ': self.row_data[26],
+                'motionAttitudeReferenceFrame': self.row_data[27],
+                'motionQuaternionX': self.row_data[28],
+                'motionQuaternionY': self.row_data[29],
+                'motionQuaternionZ': self.row_data[30],
+                'motionQuaternionW': self.row_data[31],
+                'motionGravityX': self.row_data[32],
+                'motionGravityY': self.row_data[33],
+                'motionGravityZ': self.row_data[34],
+                'motionMagneticFieldX': self.row_data[35],
+                'motionMagneticFieldY': self.row_data[36],
+                'motionMagneticFieldZ': self.row_data[37],
+                'motionMagneticFieldCalibrationAccuracy': self.row_data[38]
+            }
+            return True
+        else:
+        # else, means "erreur réception de données.
+        # please check that checkboxes 'HEAD', 'GYRO', 'ACC' and 'DM' are checked"
+            return False # we can therefore use the old data, which wasn't corrupted! (except if it's the first loop...)
         
 
 
 
 class DataBoard:
-    """format and display data from DataServer
+    """display data from DataServer, with ncurses
     
     Attributes:
     X,Y : horizontal and vertical size of the board
@@ -129,6 +185,11 @@ class DataBoard:
             self.scr.addstr(1+y, self.X+1, '|')
         self.scr.refresh()
 
+        # defines ncurses colors
+        start_color()
+        init_pair(1, COLOR_GREEN, COLOR_BLACK)
+
+
 
 
     def set_screen(self, mode):
@@ -148,7 +209,7 @@ class DataBoard:
             self.scr.addstr(8, 55, 'zAxis')
 
 
-    def update_screen(self, mode, data):
+    def update_screen(self, mode, datumFocus):
         """update the board with data received from the phone, formated depending the mode"""
         X,Y = self.X, self.Y
 
@@ -161,9 +222,9 @@ class DataBoard:
                 'yAxis': data[4],
                 'zAxis': data[5]
             }
-
             self.scr.addstr(4, 5, data['logSample'])
             self.scr.addstr(4, 30, data['logTime_sinceReboot'])
+
         #axe de roulis
             xData = float(data['xAxis'])
             self.scr.addstr(10, 5, str(xData))
@@ -176,53 +237,11 @@ class DataBoard:
 
         #axe de roulis ?
             zData = float(data['zAxis'])
-            self.scr.addstr(10, 55, str(zData))
-
+            self.scr.addstr(10, 55, str(zData), color_pair(1))
             
             self.scr.refresh()
 
-    def data_format(self, data):
-        if len(data.data) == 39:
-            data.data = {
-                'loggingTime': data.data[0],
-                'loggingSample': data.data[1],
-                'locationHeadingTimestamp_since1970': data.data[2],
-                'locationHeadingX': data.data[3],
-                'locationHeadingY': data.data[4],
-                'locationHeadingZ': data.data[5],
-                'locationTrueHeading': data.data[6],
-                'locationMagneticHeading': data.data[7],
-                'locationHeadingAccuracy': data.data[8],
-                'accelerometerTimestamp_sinceReboot': data.data[9],
-                'accelerometerAccelerationX': data.data[10],
-                'accelerometeraccelerationY': data.data[11],
-                'accelerometeraccelerationZ': data.data[12],
-                'gyroTimestamp_sinceReboot': data.data[13],
-                'gyroRotationX': data.data[15],
-                'gyroRotationY': data.data[16],
-                'gyroRotationZ': data.data[17],
-                'motionTimestamp_sinceReboot': data.data[18],
-                'motionYaw': data.data[19],
-                'motionRoll': data.data[20],
-                'motionPitch': data.data[21],
-                'motionRotationRateX': data.data[22],
-                'motionRotationRateY': data.data[23],
-                'motionRotationRateZ': data.data[24],
-                'motionUserAccelerationX': data.data[25],
-                'motionUserAccelerationY': data.data[26],
-                'motionUserAccelerationZ': data.data[27],
-                'motionAttitudeReferenceFrame': data.data[28],
-                'motionQuaternionX': data.data[29],
-                'motionQuaternionY': data.data[30],
-                'motionQuaternionZ': data.data[31],
-                'motionQuaternionW': data.data[32],
-                'motionGravityX': data.data[33],
-                'motionGravityY': data.data[34],
-                'motionGravityZ': data.data[35],
-                'motionMagneticFieldX': data.data[36],
-                'motionMagneticFieldY': data.data[37],
-                'motionMagneticFieldZ': data.data[38],
-                'motionMagneticFieldCalibrationAccuracy': data.data[39]
-            }
-        # else, means "erreur réception de données.
-        # please check that checkboxes 'HEAD', 'GYRO', 'ACC' and 'DM' are checked"
+        elif 'ALL':
+        # are 'HEAD', 'GYRO', 'ACC' and 'DM' checked?
+            self.scr.addstr(10, 5, str("None"))
+
