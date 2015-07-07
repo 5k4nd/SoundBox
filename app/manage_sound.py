@@ -1,7 +1,7 @@
 #! -*- coding: utf8 -*-
 
 from pyo import *
-import gammes
+#import gammes
 ### pyo documentation : http://ajaxsoundstudio.com/pyodoc/
 
 
@@ -27,11 +27,13 @@ class SoundServer:
         self.server = Server()
         self.server.boot().start()
         self.sound1 = Sine(451, 0, 0).out()
+        #self.gamme = gammes.g3
 
 
 ### pyo and sound mappings
     # lot of fun in this function. try new mappings!
     def sound_map(y, x, data):
+        """cette fonction n'a pas encore été retouchée depuis l'ancien module, ATTENTION, obsolète donc !"""
         dia.sound.mul = 1
         if data == 0.0:
             scr.addstr(y, x, 'do')
@@ -44,6 +46,7 @@ class SoundServer:
         scr.refresh()
 
     def sound_map_alter(y, x, data):
+        """cette fonction n'a pas encore été retouchée depuis l'ancien module, ATTENTION, obsolète donc !"""
         dia.sound.mul = 1
         if data < -0.5:
             dia.sound.freq += 5
@@ -55,11 +58,14 @@ class SoundServer:
     def sound_map_variations(self, data):
     #spectre : environ 250-500Hz (le do est à 261.63)
     #tenir l'iPhone sur la tranche (boutons de volume vers le ciel, écran à droite)
+    #l'iPhone à plat (face vers le haut, paume de la main contre table) = aucun son
         self.sound1.mul = 1
         data += 2**2
         data **= 4
         data += 100
         self.sound1.freq = round(data)
 
-        
+    def play_note(self, freq):
+        self.sound1.mul = 1
+        self.sound1.freq = freq
 

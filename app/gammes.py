@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf8 -*-
 
+GAMME_SCHEME_WITH_BEM = ['do', 'dod','re','red','mi','fa','fad','sol','sold','la','lad','si']
+GAMME_SCHEME = ['do','re', 'mi','fa', 'sol', 'la','si']
+
 g0 = {
 	'do': 32.7,
 	'dod': 34.65,

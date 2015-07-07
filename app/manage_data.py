@@ -154,7 +154,7 @@ class DataServer:
 
 
 
-class DataBoard:
+class DataScreenBoard:
     """display data from DataServer, with ncurses
     
     Attributes:
