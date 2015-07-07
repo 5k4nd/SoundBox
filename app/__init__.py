@@ -3,6 +3,7 @@
 from time import sleep
 from manage_data import DataServer, DataBoard
 from manage_sound import SoundServer
+#from manage_keyboard import KeyboardServer
 
 # imports dupliqués... alternative possible, ou pas ?
 import socket
@@ -50,7 +51,7 @@ def main_keyloop(stdscr, data, sound):
         if 0<c<256:
             c = chr(abs(c)) # abs for the -1
             if c in 'Pp':
-            # launch receiving data
+            # launch receiving data and sound_binding with this data
                 board.set_screen('ACC')
                 while (1):
                     c = stdscr.getch()
@@ -86,7 +87,7 @@ def main_keyloop(stdscr, data, sound):
 def launch(stdscr, HOSTIP, PORT):
 # starting threads for data and sound
     data = DataServer(HOSTIP, PORT)
-    sound = SoundServer()
+    sound = SoundServer() #remove this in mainloop, and shutdown too
     
 # enter the main loop -- key binding
     main_keyloop(stdscr, data, sound)

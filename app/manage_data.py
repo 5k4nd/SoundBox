@@ -20,6 +20,7 @@ class DataServer:
 
     """
     DATASCHEME = [ # may be useful for data_format() for optimization. maybe list.join() method, or something like that?
+    # schema when 'HEAD', 'GYRO', 'ACC' and 'DM' are checked
         'loggingTime',
         'loggingSample',
         'locationHeadingTimestamp_since1970',
@@ -207,6 +208,10 @@ class DataBoard:
 
         #axe de roulis ?
             self.scr.addstr(8, 55, 'zAxis')
+
+        elif mode == 'ALL':
+        # schema when 'HEAD', 'GYRO', 'ACC' and 'DM' are checked
+            print 'toDo!'
 
 
     def update_screen(self, mode, datumFocus):
