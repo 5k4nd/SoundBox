@@ -18,16 +18,28 @@ class daemon_data(Thread):
 
     '''
 
-    def __init__(self, scr, core_ref):
+    def __init__(self, scr, core_ref, d_glove_ref):
         Thread.__init__(self)
         self.scr = scr
         self.core = core_ref
+        self.d_glove = d_glove_ref
 
     def run(self):
         while 1:
             sleep(.01)
             try:
-                a = 42
+            # veille sur les switchs
+                # switch1 sur {f2, f3, f4}
+                if self.core.last_entry == 266:
+                    self.scr.addstr(5, 170, 'son a--'+9*" ")
+                if self.core.last_entry == 267:
+                    self.scr.addstr(5, 170, 'son a pause/play')
+                if self.core.last_entry == 268:
+                    self.scr.addstr(5, 170, 'son a++'+9*" ")
+
+            # veille sur le data_glove
+                if self.d_glove.formated_data['loggingSample'] == 0:
+                    self.d_glove.formated_data['loggingSample'] = "no socket data"
             except:
                 self.core.erreurs = "erreur dans input_laptop"
 

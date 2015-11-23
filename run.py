@@ -14,14 +14,20 @@ def launch(scr):
     core(
         SERVER_IP='192.168.1.12',
         SERVER_PORT=508,
-        SCR=scr
+        SCR=scr,
+        RECEPTION_MODE="ACC"  # données à recevoir
     ).start()
 
 wrapper(launch)  # encapsulation pour curses
 
 """
 ToDo :
-    > finir de récupérer le manage_data.py et puis le reste
+    > finir de récupérer l'ancien
+    > puis compléter l'UML
+    > fichier de logs
 
+bugs:
+    > curses se lance jamais si pyo ne démarre pas (typiquement, ce dernier ne 
+        démarre pas si une instance de pyo est déjà en route :p)
 
 """

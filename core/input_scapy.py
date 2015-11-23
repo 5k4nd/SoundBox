@@ -18,7 +18,7 @@ class daemon_glove(Thread):
 
     '''
 
-    def __init__(self, mode="ACC"):
+    def __init__(self, core_ref, mode="ACC"):
         def init_formated_data(mode):
             if mode == "ACC":
                 return {
@@ -35,6 +35,7 @@ class daemon_glove(Thread):
                 return [0]*7
 
         Thread.__init__(self)
+        self.core = core_ref
         self.mode = mode  # à passer en paramètres plus tard
         self.erreurs = "none"
         self.raw_data = init_raw_data(mode)
@@ -104,6 +105,8 @@ class daemon_glove(Thread):
         
         while 1:
             sleep(.01)
+            # ToDo
+            # tout ce qui suit doit être fait dans une "def formating_data(raw_data)"
             if self.mode == 'ACC':
                 self.formated_data = {
                     'loggingTime': self.raw_data[0],
@@ -137,6 +140,10 @@ class daemon_glove(Thread):
         return self.formated_data
 
     def kill_daemon_data_network(self):
+        try:
+            self.d_data_network.sock.shutdown(socket.SHUT_WR)
+        except:
+            self.core.erreurs = "> kill_d_data_network error:" + str(exc_info())
         self.d_data_network._Thread__stop()
 
 
@@ -164,12 +171,12 @@ class daemon_glove(Thread):
         def run(self):
             mode_len = 7
             try:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.connect(('192.168.1.12', 508))
+                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.sock.connect(('192.168.1.12', 508))
                 # self.sock.connect((HOSTIP, PORT))
                 while 1:
                     sleep(.01)
-                    receivedData = sock.recv(1024).split(',')
+                    receivedData = self.sock.recv(1024).split(',')
                     if len(receivedData) == mode_len:
                         try:
                         # I check the second field which is the count.
@@ -185,8 +192,6 @@ class daemon_glove(Thread):
             except:
                 self.mother_daemon_glove.erreurs = "> socket errors: "\
                     + str(exc_info())
-            #except socket.error, exc:
-                #self.mother_daemon_glove.erreurs = exc
 
 
         def stop_reception(self):
