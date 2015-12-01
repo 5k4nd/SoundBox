@@ -33,7 +33,7 @@ class LogFile(logging.Logger):
             level = "info"
 
         if 'newline' in kwargs:
-            if kwargs['newline'] == True:
+            for i in range(kwargs['newline']):
                 eval("logger." + level + "(\"" + "\")")
 
         message = format_datetime(datetime.now(), "HH:mm:ss", locale='en')\

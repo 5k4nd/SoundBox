@@ -43,7 +43,7 @@ class core(Thread):
 
 
     def run(self):
-        self.logger.p_log('program started', newline=True)
+        self.logger.p_log('program started', newline=3)
 
         try:
             d_audio = daemon_audio(self.logger)

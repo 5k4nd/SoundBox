@@ -24,7 +24,6 @@ wrapper(launch)  # encapsulation pour curses
 ToDo :
     > finir de récupérer l'ancien
     > puis compléter l'UML
-    > fichier de logs
 
 bugs:
     > curses se lance jamais vraiment si pyo ne démarre pas (typiquement, c'est le cas quand
