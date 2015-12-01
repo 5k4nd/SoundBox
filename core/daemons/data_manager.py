@@ -18,11 +18,12 @@ class daemon_data(Thread):
 
     '''
 
-    def __init__(self, scr, core_ref, d_glove_ref):
+    def __init__(self, scr, core_ref, d_glove_ref, d_audio_ref):
         Thread.__init__(self)
         self.scr = scr
         self.core = core_ref
         self.d_glove = d_glove_ref
+        self.d_audio = d_audio_ref
 
     def run(self):
         while 1:

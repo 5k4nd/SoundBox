@@ -27,7 +27,7 @@ ToDo :
     > fichier de logs
 
 bugs:
-    > curses se lance jamais si pyo ne démarre pas (typiquement, ce dernier ne 
-        démarre pas si une instance de pyo est déjà en route :p)
+    > curses se lance jamais vraiment si pyo ne démarre pas (typiquement, c'est le cas quand
+        une instance de pyo est déjà en route dans un autre programme :p)
 
 """

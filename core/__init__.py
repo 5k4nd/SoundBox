@@ -1,13 +1,16 @@
 # -*- coding: utf8 -*-
 
+from daemons.input_scapy import daemon_glove
+from daemons.output_graphic import daemon_curses
+from daemons.output_audio import daemon_audio
+from daemons.data_manager import daemon_data
+
 from threading import Thread
-from input_scapy import daemon_glove
-from output_graphic import daemon_curses
-from output_audio import daemon_audio
-from data_manager import daemon_data
 from time import sleep
 from sys import exc_info
 import traceback
+from logger_02 import LogFile
+from pprint import pprint
 
 from curses import (
     endwin,
@@ -35,16 +38,18 @@ class core(Thread):
         self.last_entry = " none"
         self.erreurs = "pas d'erreurs pour le moment"
         self.reception_mode = RECEPTION_MODE
+        self.logger = LogFile('app.log')
+        self.logger.initself()
 
 
     def run(self):
-        # on lance keyboard AVANT curses pour qu'ce dernier ait la main sur scr
+        self.logger.p_log('program started', newline=True)
+
         try:
-            a=42
-            #d_audio = daemon_audio(self)
+            d_audio = daemon_audio(self.logger)
         except:
-            self.erreurs = "> pyo start daemon errors: "\
-                + str(exc_info())
+            self.logger.p_log('pyo start daemon: ', error=exc_info())
+
         d_glove = daemon_glove(
             core_ref=self,
             mode=self.reception_mode
@@ -53,7 +58,8 @@ class core(Thread):
         self.d_data_manager = daemon_data(
             self.scr,
             core_ref=self,
-            d_glove_ref=d_glove
+            d_glove_ref=d_glove,
+            d_audio_ref=d_audio
         )
         self.d_data_manager.start()  # Thread-2 = OBSOLETE !
         self.d_curses = daemon_curses(
@@ -76,7 +82,7 @@ class core(Thread):
                 # on remplit avec des blancs pour que ça fasse tjrs 5 " "
                 self.last_entry = current_entry
 
-                if current_entry == ord('q'):
+                if current_entry == 27:  # <échap>  # ord('q')
                     break
             else:
                 if current_entry == KEY_LEFT:
@@ -90,6 +96,8 @@ class core(Thread):
         d_glove._Thread__stop()
         self.d_data_manager._Thread__stop()
         self.d_curses._Thread__stop()
+
         endwin()  # restaure le terminal à son état d'origine
+        self.logger.p_log('program ends.')
         print "traceback:"
         traceback.print_exc()  # affiche exception si il y a
