@@ -24,6 +24,7 @@ class daemon_data(Thread):
         self.core = core_ref
         self.d_glove = d_glove_ref
         self.d_audio = d_audio_ref
+        self.core.logger.p_log('(DATA) init')
 
     def run(self):
         while 1:

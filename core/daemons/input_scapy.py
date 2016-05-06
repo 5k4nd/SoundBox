@@ -40,6 +40,7 @@ class daemon_glove(Thread):
         self.erreurs = "none"
         self.raw_data = init_raw_data(mode)
         self.formated_data = init_formated_data(mode)
+        self.core.logger.p_log('(GLOVE) init')
 
         # currently not used
         """
@@ -102,7 +103,7 @@ class daemon_glove(Thread):
             HOSTPORT='508'
         )
         self.d_data_network.start()
-        
+
         while 1:
             sleep(.01)
             # ToDo
@@ -169,14 +170,17 @@ class daemon_glove(Thread):
             self.mother_daemon_glove=mother_ref
 
         def run(self):
-            mode_len = 7
+            mode_len = 7 # attention, lié au mode ACC.
             try:
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.sock.connect(('192.168.1.12', 508))
                 # self.sock.connect((HOSTIP, PORT))
                 while 1:
                     sleep(.01)
-                    receivedData = self.sock.recv(1024).split(',')
+                    try:
+                        receivedData = self.sock.recv(1024).split(',')
+                    except:
+                        self.mother_daemon_glove.core.logger.p_log('(GLOVE) receivedData ERROR ', error=exc_info())
                     if len(receivedData) == mode_len:
                         try:
                         # I check the second field which is the count.
@@ -188,6 +192,7 @@ class daemon_glove(Thread):
                         # if data is corrupted, we pass the old one for this loop
                             self.mother_daemon_glove.raw_data = old_raw_data
                             pass
+
                         
             except:
                 self.mother_daemon_glove.erreurs = "> socket errors: "\

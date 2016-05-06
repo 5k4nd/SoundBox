@@ -57,12 +57,16 @@ class daemon_curses(Thread):
             sleep(0.1)
             try:
                 # on affiche la dernière touche entrée.
-                self.scr.addstr(50, 1, "dernière touche : ")
+                try:
+                    self.scr.addstr(5, 1, "dernière touche : ")
+                except:
+                    self.core.logger.p_log('(GRAPHIC) SCR_ERROR', error=exc_info())
                 printable_last_entry = str(self.core.last_entry)\
                     + (5 - len(str(self.core.last_entry))) * " "
-                self.scr.addstr(50, 19, printable_last_entry, A_NORMAL)
-                self.scr.addstr(50, 24, "|| " + self.core.erreurs)
+                self.scr.addstr(5, 19, printable_last_entry, A_NORMAL)
+                self.scr.addstr(5, 24, "|| " + self.core.erreurs)
 
+                # on affiche les infos du gant
                 self.dataprint('glove', self.d_glove.formated_data['loggingSample'])
             except:
                 self.core.erreurs = "> curses_error" + str(exc_info())

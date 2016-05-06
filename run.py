@@ -21,6 +21,8 @@ def launch(scr):
 wrapper(launch)  # encapsulation pour curses
 
 """
+<échap> pour quitter
+
 ToDo :
     > finir de récupérer l'ancien
     > puis compléter l'UML

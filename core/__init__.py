@@ -47,46 +47,50 @@ class core(Thread):
 
         try:
             d_audio = daemon_audio(self.logger)
+            self.logger.p_log('(CORE) start daemon_glove')
+            sleep(3)
+            d_glove = daemon_glove(
+                core_ref=self,
+                mode=self.reception_mode
+            )
+            d_glove.start()
+
+            self.d_data_manager = daemon_data(
+                self.scr,
+                core_ref=self,
+                d_glove_ref=d_glove,
+                d_audio_ref=d_audio
+            )
+            self.d_data_manager.start()  # Thread-2 = OBSOLETE !
+
+            self.d_curses = daemon_curses(
+                self.scr,
+                core_ref=self,
+                d_glove_ref=d_glove
+            )
+            self.d_curses.start()  # Thread-3 = OBSOLETE !
+
+            sleep(.01)  # wait, pour être sûr que les thread soient bien lancés
+            self.d_curses.scr_init()
+
+            # boucle de get_key
+            while 1:
+                sleep(0.1)
+                self.scr.nodelay(1)  # rend getch() non-bloquant
+                current_entry = self.scr.getch()
+                if 0 < current_entry < 356:  # si lettre connue, on la traite
+                    # on commence par le stocker
+                    # on remplit avec des blancs pour que ça fasse tjrs 5 " "
+                    self.last_entry = current_entry
+
+                    if current_entry == 27:  # <échap>  # ord('q')
+                        break
+                else:
+                    if current_entry == KEY_LEFT:
+                        self.last_entry = str(current_entry)
         except:
-            self.logger.p_log('pyo start daemon: ', error=exc_info())
+            self.logger.p_log('(CORE) ERROR in daemons init ', error=exc_info())
 
-        d_glove = daemon_glove(
-            core_ref=self,
-            mode=self.reception_mode
-        )
-        d_glove.start()
-        self.d_data_manager = daemon_data(
-            self.scr,
-            core_ref=self,
-            d_glove_ref=d_glove,
-            d_audio_ref=d_audio
-        )
-        self.d_data_manager.start()  # Thread-2 = OBSOLETE !
-        self.d_curses = daemon_curses(
-            self.scr,
-            core_ref=self,
-            d_glove_ref=d_glove
-        )
-        self.d_curses.start()  # Thread-3 = OBSOLETE !
-
-        sleep(.01)  # wait, pour être sûr que les thread soient bien lancés
-        self.d_curses.scr_init()
-
-        # boucle de get_key
-        while 1:
-            sleep(0.1)
-            self.scr.nodelay(1)  # rend getch() non-bloquant
-            current_entry = self.scr.getch()
-            if 0 < current_entry < 356:  # si lettre connue, on la traite
-                # on commence par le stocker
-                # on remplit avec des blancs pour que ça fasse tjrs 5 " "
-                self.last_entry = current_entry
-
-                if current_entry == 27:  # <échap>  # ord('q')
-                    break
-            else:
-                if current_entry == KEY_LEFT:
-                    self.last_entry = str(current_entry)
 
 
         # FIN DU PROGRAMME, ON NETTOIE TOUT. RANGER TOUT ÇA DANS DES MÉTHODES

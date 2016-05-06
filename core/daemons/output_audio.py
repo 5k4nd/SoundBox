@@ -33,7 +33,7 @@ class daemon_audio:
         #self.s_a = Sine(451, 0, 1).out()
         self.son1 = daemon_audio.Sound("do")
         self.son1.volume(1)
-        self.logger.p_log('pyo Server initialized')
+        self.logger.p_log('(AUDIO) pyo Server initialized')
         
     def run(self):
         i=0
